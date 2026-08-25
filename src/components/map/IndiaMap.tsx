@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -44,13 +44,13 @@ const STATE_NAME_TO_SLUG: Record<string, string> = {
   Ladakh: "ladakh",
 };
 
-const DATA_SLUGS = [
+const FULL_DATA_SLUGS = [
   "andhra-pradesh", "telangana", "tamil-nadu", "karnataka",
   "kerala", "maharashtra", "west-bengal", "punjab", "rajasthan", "gujarat",
 ];
 
-function hasData(slug: string): boolean {
-  return DATA_SLUGS.includes(slug);
+function hasFullData(slug: string): boolean {
+  return FULL_DATA_SLUGS.includes(slug);
 }
 
 type GeoJSONData = {
@@ -105,52 +105,70 @@ export default function IndiaMap({ selectedSlug, onSelectRegion, className = "" 
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const style = (feature?: any) => {
+  const style = useCallback((feature?: any) => {
     const name = feature?.properties?.NAME_1 as string | undefined;
     const slug = name ? STATE_NAME_TO_SLUG[name] : null;
     const selected = slug !== null && slug === selectedSlug;
-    const hasRegionData = slug !== null && hasData(slug);
+    const hasData = slug !== null && hasFullData(slug);
+
     return {
-      fillColor: selected ? "#EA580C" : hasRegionData ? "#FFF7ED" : "#F5F5F4",
+      fillColor: selected ? "#EA580C" : hasData ? "#FFF7ED" : "#E7E5E4",
       weight: selected ? 2.5 : 1,
       opacity: 1,
-      color: selected ? "#EA580C" : "#D6D3D1",
-      fillOpacity: selected ? 0.7 : hasRegionData ? 0.6 : 0.3,
+      color: selected ? "#EA580C" : "#A8A29E",
+      fillOpacity: selected ? 0.7 : hasData ? 0.55 : 0.25,
+      cursor: slug ? "pointer" : "default",
     };
-  };
+  }, [selectedSlug]);
+
+  const handleStateClick = useCallback((slug: string) => {
+    onSelectRegion(slug);
+  }, [onSelectRegion]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onEachFeature = (feature: any, layer: any) => {
+  const onEachFeature = useCallback((feature: any, layer: any) => {
     const name = feature.properties?.NAME_1 as string;
     if (name) {
-      layer.bindTooltip(name, {
-        permanent: false,
-        direction: "top",
-        className: "bg-white px-2 py-1 text-xs font-medium text-stone-700 rounded-lg shadow-sm border border-stone-100",
-      });
+      const slug = STATE_NAME_TO_SLUG[name];
+      const hasData = slug ? hasFullData(slug) : false;
+      layer.bindTooltip(
+        hasData ? `${name} — Explore` : name,
+        {
+          permanent: false,
+          direction: "top",
+          offset: [0, -5],
+          className: "bg-white px-3 py-1.5 text-xs font-medium text-stone-700 rounded-lg shadow-md border border-stone-100",
+        }
+      );
     }
-    const slug = STATE_NAME_TO_SLUG[name];
-    if (slug && hasData(slug)) {
+    const slug = name ? STATE_NAME_TO_SLUG[name] : null;
+    if (slug) {
+      const hasData = hasFullData(slug);
       layer.on({
-        click: () => onSelectRegion(slug),
+        click: () => handleStateClick(slug),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mouseover: function (this: any) {
-          this.setStyle({ weight: 2.5, color: "#EA580C", fillOpacity: 0.8 });
+          this.setStyle({
+            weight: 2.5,
+            color: "#EA580C",
+            fillOpacity: hasData ? 0.75 : 0.45,
+          });
+          this.bringToFront();
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mouseout: function (this: any) {
           const isSel = slug === selectedSlug;
           this.setStyle({
-            fillColor: isSel ? "#EA580C" : "#FFF7ED",
+            fillColor: isSel ? "#EA580C" : hasData ? "#FFF7ED" : "#E7E5E4",
             weight: isSel ? 2.5 : 1,
             opacity: 1,
-            color: isSel ? "#EA580C" : "#D6D3D1",
-            fillOpacity: isSel ? 0.7 : 0.6,
+            color: isSel ? "#EA580C" : "#A8A29E",
+            fillOpacity: isSel ? 0.7 : hasData ? 0.55 : 0.25,
           });
         },
       });
     }
-  };
+  }, [handleStateClick, selectedSlug]);
 
   if (loading) {
     return (
@@ -186,6 +204,8 @@ export default function IndiaMap({ selectedSlug, onSelectRegion, className = "" 
         zoomControl={false}
         className="w-full h-full rounded-2xl"
         style={{ background: "#F5F5F4" }}
+        minZoom={3}
+        maxZoom={10}
       >
         <ZoomControl position="topright" />
         <TileLayer
@@ -201,11 +221,11 @@ export default function IndiaMap({ selectedSlug, onSelectRegion, className = "" 
           onEachFeature={onEachFeature}
         />
       </MapContainer>
-      {!selectedSlug && (
-        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm border border-stone-100">
-          <p className="text-xs text-stone-500">Click a highlighted state to explore its place</p>
-        </div>
-      )}
+      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm border border-stone-100 max-w-xs">
+        <p className="text-xs text-stone-500">
+          Click any state to explore. Orange states have full content.
+        </p>
+      </div>
     </div>
   );
 }

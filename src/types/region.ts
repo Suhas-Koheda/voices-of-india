@@ -26,6 +26,14 @@ export type Place = {
   description: string;
 };
 
+export type SubRegion = {
+  name: string;
+  description: string;
+  dialect?: string;
+  localPhrase?: string;
+  localPhraseMeaning?: string;
+};
+
 export type Region = {
   id: string;
   name: string;
@@ -36,6 +44,7 @@ export type Region = {
   languageFamily: string;
   capital: string;
   cities: Place[];
+  subRegions?: SubRegion[];
   geography: string;
   history: string;
   food: Place[];
@@ -48,7 +57,7 @@ export type Region = {
 };
 
 export type SearchResult = {
-  type: "state" | "language" | "city" | "phrase" | "expression";
+  type: "state" | "language" | "city" | "phrase" | "expression" | "place";
   regionSlug: string;
   regionName: string;
   label: string;

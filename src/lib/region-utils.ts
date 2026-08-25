@@ -1,6 +1,40 @@
 import { regions } from "@/data/regions";
 import type { Region, SearchResult } from "@/types/region";
 
+const ALL_STATES: Record<string, { name: string; language: string; capital: string }> = {
+  "andhra-pradesh": { name: "Andhra Pradesh", language: "Telugu", capital: "Amaravati" },
+  "telangana": { name: "Telangana", language: "Telugu", capital: "Hyderabad" },
+  "tamil-nadu": { name: "Tamil Nadu", language: "Tamil", capital: "Chennai" },
+  "karnataka": { name: "Karnataka", language: "Kannada", capital: "Bengaluru" },
+  "kerala": { name: "Kerala", language: "Malayalam", capital: "Thiruvananthapuram" },
+  "maharashtra": { name: "Maharashtra", language: "Marathi", capital: "Mumbai" },
+  "west-bengal": { name: "West Bengal", language: "Bengali", capital: "Kolkata" },
+  "punjab": { name: "Punjab", language: "Punjabi", capital: "Chandigarh" },
+  "rajasthan": { name: "Rajasthan", language: "Rajasthani", capital: "Jaipur" },
+  "gujarat": { name: "Gujarat", language: "Gujarati", capital: "Gandhinagar" },
+  "arunachal-pradesh": { name: "Arunachal Pradesh", language: "Various", capital: "Itanagar" },
+  "assam": { name: "Assam", language: "Assamese", capital: "Dispur" },
+  "bihar": { name: "Bihar", language: "Hindi", capital: "Patna" },
+  "chhattisgarh": { name: "Chhattisgarh", language: "Hindi", capital: "Raipur" },
+  "goa": { name: "Goa", language: "Konkani", capital: "Panaji" },
+  "haryana": { name: "Haryana", language: "Hindi", capital: "Chandigarh" },
+  "himachal-pradesh": { name: "Himachal Pradesh", language: "Hindi", capital: "Shimla" },
+  "jammu-and-kashmir": { name: "Jammu and Kashmir", language: "Kashmiri", capital: "Srinagar" },
+  "jharkhand": { name: "Jharkhand", language: "Hindi", capital: "Ranchi" },
+  "ladakh": { name: "Ladakh", language: "Ladakhi", capital: "Leh" },
+  "madhya-pradesh": { name: "Madhya Pradesh", language: "Hindi", capital: "Bhopal" },
+  "manipur": { name: "Manipur", language: "Meitei", capital: "Imphal" },
+  "meghalaya": { name: "Meghalaya", language: "Khasi", capital: "Shillong" },
+  "mizoram": { name: "Mizoram", language: "Mizo", capital: "Aizawl" },
+  "nagaland": { name: "Nagaland", language: "Naga", capital: "Kohima" },
+  "odisha": { name: "Odisha", language: "Odia", capital: "Bhubaneswar" },
+  "sikkim": { name: "Sikkim", language: "Nepali", capital: "Gangtok" },
+  "tripura": { name: "Tripura", language: "Bengali", capital: "Agartala" },
+  "uttar-pradesh": { name: "Uttar Pradesh", language: "Hindi", capital: "Lucknow" },
+  "uttarakhand": { name: "Uttarakhand", language: "Hindi", capital: "Dehradun" },
+  "delhi": { name: "Delhi", language: "Hindi", capital: "New Delhi" },
+};
+
 export function getRegionBySlug(slug: string): Region | undefined {
   return regions.find((r) => r.slug === slug);
 }
@@ -13,23 +47,35 @@ export function getAllSlugs(): string[] {
   return regions.map((r) => r.slug);
 }
 
+export function getAllStateSlugs(): string[] {
+  return Object.keys(ALL_STATES);
+}
+
+export function getStateInfo(slug: string) {
+  return ALL_STATES[slug];
+}
+
 export function searchAll(query: string): SearchResult[] {
   const q = query.toLowerCase().trim();
   if (!q) return [];
 
   const results: SearchResult[] = [];
 
-  for (const region of regions) {
-    if (region.name.toLowerCase().includes(q)) {
+  // Search all states (full data + placeholder)
+  for (const [slug, state] of Object.entries(ALL_STATES)) {
+    if (state.name.toLowerCase().includes(q)) {
       results.push({
         type: "state",
-        regionSlug: region.slug,
-        regionName: region.name,
-        label: region.name,
-        sublabel: region.language,
+        regionSlug: slug,
+        regionName: state.name,
+        label: state.name,
+        sublabel: state.language,
       });
     }
+  }
 
+  // Search languages
+  for (const region of regions) {
     if (region.language.toLowerCase().includes(q)) {
       results.push({
         type: "language",
@@ -39,7 +85,10 @@ export function searchAll(query: string): SearchResult[] {
         sublabel: `Language of ${region.name}`,
       });
     }
+  }
 
+  // Search cities (only for full-data regions)
+  for (const region of regions) {
     for (const city of region.cities) {
       if (city.name.toLowerCase().includes(q)) {
         results.push({
@@ -51,7 +100,10 @@ export function searchAll(query: string): SearchResult[] {
         });
       }
     }
+  }
 
+  // Search phrases
+  for (const region of regions) {
     for (const phrase of region.phrases) {
       if (
         phrase.text.toLowerCase().includes(q) ||
@@ -67,7 +119,10 @@ export function searchAll(query: string): SearchResult[] {
         });
       }
     }
+  }
 
+  // Search expressions
+  for (const region of regions) {
     for (const expr of region.expressions) {
       if (
         expr.text.toLowerCase().includes(q) ||
@@ -84,6 +139,7 @@ export function searchAll(query: string): SearchResult[] {
     }
   }
 
+  // Deduplicate
   const seen = new Set<string>();
   return results.filter((r) => {
     const key = `${r.type}-${r.label}`;

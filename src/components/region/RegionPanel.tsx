@@ -21,9 +21,7 @@ export default function RegionPanel({ region }: RegionPanelProps) {
           <span className="inline-block px-2.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
             {region.language}
           </span>
-          <span className="text-xs text-stone-400">
-            {region.languageFamily}
-          </span>
+          <span className="text-xs text-stone-400">{region.languageFamily}</span>
         </div>
       </div>
 
@@ -37,17 +35,37 @@ export default function RegionPanel({ region }: RegionPanelProps) {
             Cities
           </h3>
           <div className="space-y-2">
-            {region.cities.slice(0, 3).map((city) => (
-              <div
-                key={city.name}
-                className="bg-stone-50 rounded-lg p-3"
-              >
-                <p className="text-sm font-semibold text-stone-700">
-                  {city.name}
-                </p>
-                <p className="text-xs text-stone-400 mt-0.5">
-                  {city.description}
-                </p>
+            {region.cities.slice(0, 4).map((city) => (
+              <div key={city.name} className="bg-stone-50 rounded-lg p-3">
+                <p className="text-sm font-semibold text-stone-700">{city.name}</p>
+                <p className="text-xs text-stone-400 mt-0.5">{city.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {region.subRegions && region.subRegions.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+            Local dialects &amp; sub-regions
+          </h3>
+          <div className="space-y-3">
+            {region.subRegions.map((sub) => (
+              <div key={sub.name} className="bg-white border border-stone-200 rounded-xl p-4">
+                <p className="text-sm font-bold text-stone-800">{sub.name}</p>
+                <p className="text-xs text-stone-500 mt-0.5">{sub.description}</p>
+                {sub.dialect && (
+                  <p className="text-xs text-orange-600 mt-1 italic">{sub.dialect}</p>
+                )}
+                {sub.localPhrase && (
+                  <div className="mt-2 bg-orange-50 rounded-lg px-3 py-2">
+                    <p className="text-sm font-medium text-stone-700">{sub.localPhrase}</p>
+                    {sub.localPhraseMeaning && (
+                      <p className="text-xs text-stone-500">{sub.localPhraseMeaning}</p>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -83,19 +101,8 @@ export default function RegionPanel({ region }: RegionPanelProps) {
         className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
       >
         Explore {region.name}
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 8l4 4m0 0l-4 4m4-4H3"
-          />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>
       </Link>
     </div>
