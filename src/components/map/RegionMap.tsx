@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  MapContainer,
-  TileLayer,
-  GeoJSON,
-  useMap,
-  ZoomControl,
-} from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap, ZoomControl } from "react-leaflet";
 import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
@@ -35,12 +29,13 @@ const STATE_NAME_TO_SLUG: Record<string, string> = {
   Meghalaya: "meghalaya",
   Mizoram: "mizoram",
   Nagaland: "nagaland",
-  Orissa: "odisha",
+  Odisha: "odisha",
   Sikkim: "sikkim",
   Tripura: "tripura",
   "Uttar Pradesh": "uttar-pradesh",
   Uttarakhand: "uttarakhand",
   Delhi: "delhi",
+  Ladakh: "ladakh",
 };
 
 type GeoJSONData = {
@@ -48,39 +43,22 @@ type GeoJSONData = {
   features: Array<{
     type: "Feature";
     properties: Record<string, unknown>;
-    geometry: {
-      type: string;
-      coordinates: unknown[];
-    };
+    geometry: { type: string; coordinates: unknown[] };
   }>;
 };
 
-type RegionMapProps = {
-  targetSlug: string;
-  className?: string;
-};
+type RegionMapProps = { targetSlug: string; className?: string };
 
-function FocusState({
-  geojson,
-  targetSlug,
-}: {
-  geojson: GeoJSONData;
-  targetSlug: string;
-}) {
+function FocusState({ geojson, targetSlug }: { geojson: GeoJSONData; targetSlug: string }) {
   const map = useMap();
-
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const L = (window as any).L;
     if (!L || !geojson) return;
-
     const targetFeature = geojson.features.find((f) => {
       const name = f.properties?.NAME_1;
-      return (
-        typeof name === "string" && STATE_NAME_TO_SLUG[name] === targetSlug
-      );
+      return typeof name === "string" && STATE_NAME_TO_SLUG[name] === targetSlug;
     });
-
     if (targetFeature) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const geoJsonLayer = L.geoJSON(targetFeature as any);
@@ -90,14 +68,10 @@ function FocusState({
       }
     }
   }, [geojson, targetSlug, map]);
-
   return null;
 }
 
-export default function RegionMap({
-  targetSlug,
-  className = "",
-}: RegionMapProps) {
+export default function RegionMap({ targetSlug, className = "" }: RegionMapProps) {
   const [geojson, setGeojson] = useState<GeoJSONData | null>(null);
 
   useEffect(() => {
@@ -109,9 +83,7 @@ export default function RegionMap({
 
   if (!geojson) {
     return (
-      <div
-        className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}
-      >
+      <div className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}>
         <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
       </div>
     );
@@ -122,7 +94,6 @@ export default function RegionMap({
     const name = feature?.properties?.NAME_1 as string | undefined;
     const slug = name ? STATE_NAME_TO_SLUG[name] : undefined;
     const isTarget = slug === targetSlug;
-
     return {
       fillColor: isTarget ? "#EA580C" : "#E7E5E4",
       weight: isTarget ? 2.5 : 0.5,
@@ -135,7 +106,7 @@ export default function RegionMap({
   return (
     <div className={`relative ${className}`}>
       <MapContainer
-        center={[20.5, 78.9]}
+        center={[22.5, 80.0]}
         zoom={5}
         scrollWheelZoom={true}
         zoomControl={false}
@@ -160,8 +131,7 @@ export default function RegionMap({
               layer.bindTooltip(name, {
                 permanent: false,
                 direction: "top",
-                className:
-                  "bg-white px-2 py-1 text-xs font-medium text-stone-700 rounded-lg shadow-sm border border-stone-100",
+                className: "bg-white px-2 py-1 text-xs font-medium text-stone-700 rounded-lg shadow-sm border border-stone-100",
               });
             }
           }}

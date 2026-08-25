@@ -49,6 +49,12 @@ export default function Header() {
               Languages
             </Link>
             <Link
+              href="/contribute"
+              className="text-sm font-medium text-stone-600 hover:text-orange-500 transition-colors"
+            >
+              Contribute
+            </Link>
+            <Link
               href="/about"
               className="text-sm font-medium text-stone-600 hover:text-orange-500 transition-colors"
             >
@@ -103,6 +109,13 @@ export default function Header() {
               className="block px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-orange-500 transition-colors"
             >
               Languages
+            </Link>
+            <Link
+              href="/contribute"
+              onClick={() => setMobileOpen(false)}
+              className="block px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-orange-500 transition-colors"
+            >
+              Contribute
             </Link>
             <Link
               href="/about"

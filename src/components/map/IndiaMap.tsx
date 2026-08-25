@@ -24,7 +24,7 @@ const STATE_NAME_TO_SLUG: Record<string, string> = {
   "Arunachal Pradesh": "arunachal-pradesh",
   Assam: "assam",
   Bihar: "bihar",
-  "Chhattisgarh": "chhattisgarh",
+  Chhattisgarh: "chhattisgarh",
   Goa: "goa",
   Haryana: "haryana",
   "Himachal Pradesh": "himachal-pradesh",
@@ -35,31 +35,18 @@ const STATE_NAME_TO_SLUG: Record<string, string> = {
   Meghalaya: "meghalaya",
   Mizoram: "mizoram",
   Nagaland: "nagaland",
-  Orissa: "odisha",
+  Odisha: "odisha",
   Sikkim: "sikkim",
   Tripura: "tripura",
   "Uttar Pradesh": "uttar-pradesh",
   Uttarakhand: "uttarakhand",
   Delhi: "delhi",
-  "Andaman and Nicobar": "andaman-nicobar",
-  Chandigarh: "chandigarh",
-  "Dadra and Nagar Haveli": "dadra-nagar-haveli",
-  "Daman and Diu": "daman-diu",
-  Lakshadweep: "lakshadweep",
-  Puducherry: "puducherry",
+  Ladakh: "ladakh",
 };
 
 const DATA_SLUGS = [
-  "andhra-pradesh",
-  "telangana",
-  "tamil-nadu",
-  "karnataka",
-  "kerala",
-  "maharashtra",
-  "west-bengal",
-  "punjab",
-  "rajasthan",
-  "gujarat",
+  "andhra-pradesh", "telangana", "tamil-nadu", "karnataka",
+  "kerala", "maharashtra", "west-bengal", "punjab", "rajasthan", "gujarat",
 ];
 
 function hasData(slug: string): boolean {
@@ -71,10 +58,7 @@ type GeoJSONData = {
   features: Array<{
     type: "Feature";
     properties: Record<string, unknown>;
-    geometry: {
-      type: string;
-      coordinates: unknown[];
-    };
+    geometry: { type: string; coordinates: unknown[] };
   }>;
 };
 
@@ -86,7 +70,6 @@ type IndiaMapProps = {
 
 function FitBounds({ geojson }: { geojson: GeoJSONData | null }) {
   const map = useMap();
-
   useEffect(() => {
     if (geojson && map) {
       try {
@@ -100,20 +83,13 @@ function FitBounds({ geojson }: { geojson: GeoJSONData | null }) {
             map.fitBounds(bounds, { padding: [20, 20] });
           }
         }
-      } catch {
-        // fallback: map has default view
-      }
+      } catch { /* fallback */ }
     }
   }, [geojson, map]);
-
   return null;
 }
 
-export default function IndiaMap({
-  selectedSlug,
-  onSelectRegion,
-  className = "",
-}: IndiaMapProps) {
+export default function IndiaMap({ selectedSlug, onSelectRegion, className = "" }: IndiaMapProps) {
   const [geojson, setGeojson] = useState<GeoJSONData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -124,32 +100,19 @@ export default function IndiaMap({
         if (!res.ok) throw new Error("Failed to load map data");
         return res.json();
       })
-      .then((data: GeoJSONData) => {
-        setGeojson(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
+      .then((data: GeoJSONData) => { setGeojson(data); setLoading(false); })
+      .catch(() => { setError(true); setLoading(false); });
   }, []);
 
-  const style = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    feature?: any
-  ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const style = (feature?: any) => {
     const name = feature?.properties?.NAME_1 as string | undefined;
     const slug = name ? STATE_NAME_TO_SLUG[name] : null;
     const selected = slug !== null && slug === selectedSlug;
     const hasRegionData = slug !== null && hasData(slug);
-
     return {
-      fillColor: selected
-        ? "#EA580C"
-        : hasRegionData
-        ? "#FFF7ED"
-        : "#F5F5F4",
-      weight: selected ? 2 : 1,
+      fillColor: selected ? "#EA580C" : hasRegionData ? "#FFF7ED" : "#F5F5F4",
+      weight: selected ? 2.5 : 1,
       opacity: 1,
       color: selected ? "#EA580C" : "#D6D3D1",
       fillOpacity: selected ? 0.7 : hasRegionData ? 0.6 : 0.3,
@@ -163,32 +126,26 @@ export default function IndiaMap({
       layer.bindTooltip(name, {
         permanent: false,
         direction: "top",
-        className:
-          "bg-white px-2 py-1 text-xs font-medium text-stone-700 rounded-lg shadow-sm border border-stone-100",
+        className: "bg-white px-2 py-1 text-xs font-medium text-stone-700 rounded-lg shadow-sm border border-stone-100",
       });
     }
-
     const slug = STATE_NAME_TO_SLUG[name];
     if (slug && hasData(slug)) {
       layer.on({
         click: () => onSelectRegion(slug),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mouseover: function (this: any) {
-          this.setStyle({
-            weight: 2,
-            color: "#EA580C",
-            fillOpacity: 0.8,
-          });
+          this.setStyle({ weight: 2.5, color: "#EA580C", fillOpacity: 0.8 });
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mouseout: function (this: any) {
-          const isSelectedSlug = slug === selectedSlug;
+          const isSel = slug === selectedSlug;
           this.setStyle({
-            fillColor: isSelectedSlug ? "#EA580C" : "#FFF7ED",
-            weight: isSelectedSlug ? 2 : 1,
+            fillColor: isSel ? "#EA580C" : "#FFF7ED",
+            weight: isSel ? 2.5 : 1,
             opacity: 1,
-            color: isSelectedSlug ? "#EA580C" : "#D6D3D1",
-            fillOpacity: isSelectedSlug ? 0.7 : 0.6,
+            color: isSel ? "#EA580C" : "#D6D3D1",
+            fillOpacity: isSel ? 0.7 : 0.6,
           });
         },
       });
@@ -197,9 +154,7 @@ export default function IndiaMap({
 
   if (loading) {
     return (
-      <div
-        className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}
-      >
+      <div className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}>
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-stone-400">Loading map...</p>
@@ -210,28 +165,13 @@ export default function IndiaMap({
 
   if (error || !geojson) {
     return (
-      <div
-        className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}
-      >
+      <div className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}>
         <div className="text-center px-6">
-          <svg
-            className="w-10 h-10 text-stone-300 mx-auto mb-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-            />
+          <svg className="w-10 h-10 text-stone-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
           <p className="text-sm text-stone-500 mb-1">Could not load map data</p>
-          <p className="text-xs text-stone-400">
-            Please refresh the page to try again.
-          </p>
+          <p className="text-xs text-stone-400">Please refresh the page to try again.</p>
         </div>
       </div>
     );
@@ -240,7 +180,7 @@ export default function IndiaMap({
   return (
     <div className={`relative ${className}`}>
       <MapContainer
-        center={[20.5, 78.9]}
+        center={[22.5, 80.0]}
         zoom={5}
         scrollWheelZoom={true}
         zoomControl={false}
@@ -261,12 +201,9 @@ export default function IndiaMap({
           onEachFeature={onEachFeature}
         />
       </MapContainer>
-
       {!selectedSlug && (
         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm border border-stone-100">
-          <p className="text-xs text-stone-500">
-            Click a highlighted state to explore its language and culture
-          </p>
+          <p className="text-xs text-stone-500">Click a highlighted state to explore its place</p>
         </div>
       )}
     </div>
