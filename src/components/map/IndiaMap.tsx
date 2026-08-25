@@ -1,0 +1,274 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  GeoJSON,
+  useMap,
+  ZoomControl,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+
+const STATE_NAME_TO_SLUG: Record<string, string> = {
+  "Andhra Pradesh": "andhra-pradesh",
+  Telangana: "telangana",
+  "Tamil Nadu": "tamil-nadu",
+  Karnataka: "karnataka",
+  Kerala: "kerala",
+  Maharashtra: "maharashtra",
+  "West Bengal": "west-bengal",
+  Punjab: "punjab",
+  Rajasthan: "rajasthan",
+  Gujarat: "gujarat",
+  "Arunachal Pradesh": "arunachal-pradesh",
+  Assam: "assam",
+  Bihar: "bihar",
+  "Chhattisgarh": "chhattisgarh",
+  Goa: "goa",
+  Haryana: "haryana",
+  "Himachal Pradesh": "himachal-pradesh",
+  "Jammu and Kashmir": "jammu-and-kashmir",
+  Jharkhand: "jharkhand",
+  "Madhya Pradesh": "madhya-pradesh",
+  Manipur: "manipur",
+  Meghalaya: "meghalaya",
+  Mizoram: "mizoram",
+  Nagaland: "nagaland",
+  Orissa: "odisha",
+  Sikkim: "sikkim",
+  Tripura: "tripura",
+  "Uttar Pradesh": "uttar-pradesh",
+  Uttarakhand: "uttarakhand",
+  Delhi: "delhi",
+  "Andaman and Nicobar": "andaman-nicobar",
+  Chandigarh: "chandigarh",
+  "Dadra and Nagar Haveli": "dadra-nagar-haveli",
+  "Daman and Diu": "daman-diu",
+  Lakshadweep: "lakshadweep",
+  Puducherry: "puducherry",
+};
+
+const DATA_SLUGS = [
+  "andhra-pradesh",
+  "telangana",
+  "tamil-nadu",
+  "karnataka",
+  "kerala",
+  "maharashtra",
+  "west-bengal",
+  "punjab",
+  "rajasthan",
+  "gujarat",
+];
+
+function hasData(slug: string): boolean {
+  return DATA_SLUGS.includes(slug);
+}
+
+type GeoJSONData = {
+  type: "FeatureCollection";
+  features: Array<{
+    type: "Feature";
+    properties: Record<string, unknown>;
+    geometry: {
+      type: string;
+      coordinates: unknown[];
+    };
+  }>;
+};
+
+type IndiaMapProps = {
+  selectedSlug?: string;
+  onSelectRegion: (slug: string) => void;
+  className?: string;
+};
+
+function FitBounds({ geojson }: { geojson: GeoJSONData | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (geojson && map) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const L = (window as any).L;
+        if (L) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const geoJsonLayer = L.geoJSON(geojson as any);
+          const bounds = geoJsonLayer.getBounds();
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [20, 20] });
+          }
+        }
+      } catch {
+        // fallback: map has default view
+      }
+    }
+  }, [geojson, map]);
+
+  return null;
+}
+
+export default function IndiaMap({
+  selectedSlug,
+  onSelectRegion,
+  className = "",
+}: IndiaMapProps) {
+  const [geojson, setGeojson] = useState<GeoJSONData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    fetch("/geo/india-states.geojson")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load map data");
+        return res.json();
+      })
+      .then((data: GeoJSONData) => {
+        setGeojson(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
+  const style = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    feature?: any
+  ) => {
+    const name = feature?.properties?.NAME_1 as string | undefined;
+    const slug = name ? STATE_NAME_TO_SLUG[name] : null;
+    const selected = slug !== null && slug === selectedSlug;
+    const hasRegionData = slug !== null && hasData(slug);
+
+    return {
+      fillColor: selected
+        ? "#EA580C"
+        : hasRegionData
+        ? "#FFF7ED"
+        : "#F5F5F4",
+      weight: selected ? 2 : 1,
+      opacity: 1,
+      color: selected ? "#EA580C" : "#D6D3D1",
+      fillOpacity: selected ? 0.7 : hasRegionData ? 0.6 : 0.3,
+    };
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onEachFeature = (feature: any, layer: any) => {
+    const name = feature.properties?.NAME_1 as string;
+    if (name) {
+      layer.bindTooltip(name, {
+        permanent: false,
+        direction: "top",
+        className:
+          "bg-white px-2 py-1 text-xs font-medium text-stone-700 rounded-lg shadow-sm border border-stone-100",
+      });
+    }
+
+    const slug = STATE_NAME_TO_SLUG[name];
+    if (slug && hasData(slug)) {
+      layer.on({
+        click: () => onSelectRegion(slug),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mouseover: function (this: any) {
+          this.setStyle({
+            weight: 2,
+            color: "#EA580C",
+            fillOpacity: 0.8,
+          });
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mouseout: function (this: any) {
+          const isSelectedSlug = slug === selectedSlug;
+          this.setStyle({
+            fillColor: isSelectedSlug ? "#EA580C" : "#FFF7ED",
+            weight: isSelectedSlug ? 2 : 1,
+            opacity: 1,
+            color: isSelectedSlug ? "#EA580C" : "#D6D3D1",
+            fillOpacity: isSelectedSlug ? 0.7 : 0.6,
+          });
+        },
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div
+        className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}
+      >
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-stone-400">Loading map...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !geojson) {
+    return (
+      <div
+        className={`bg-stone-100 rounded-2xl flex items-center justify-center ${className}`}
+      >
+        <div className="text-center px-6">
+          <svg
+            className="w-10 h-10 text-stone-300 mx-auto mb-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+            />
+          </svg>
+          <p className="text-sm text-stone-500 mb-1">Could not load map data</p>
+          <p className="text-xs text-stone-400">
+            Please refresh the page to try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative ${className}`}>
+      <MapContainer
+        center={[20.5, 78.9]}
+        zoom={5}
+        scrollWheelZoom={true}
+        zoomControl={false}
+        className="w-full h-full rounded-2xl"
+        style={{ background: "#F5F5F4" }}
+      >
+        <ZoomControl position="topright" />
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <FitBounds geojson={geojson} />
+        <GeoJSON
+          key={selectedSlug || "none"}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data={geojson as any}
+          style={style}
+          onEachFeature={onEachFeature}
+        />
+      </MapContainer>
+
+      {!selectedSlug && (
+        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-sm border border-stone-100">
+          <p className="text-xs text-stone-500">
+            Click a highlighted state to explore its language and culture
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
