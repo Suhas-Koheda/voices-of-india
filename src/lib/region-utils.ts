@@ -20,7 +20,6 @@ export function searchAll(query: string): SearchResult[] {
   const results: SearchResult[] = [];
 
   for (const region of regions) {
-    // Match state name
     if (region.name.toLowerCase().includes(q)) {
       results.push({
         type: "state",
@@ -31,7 +30,6 @@ export function searchAll(query: string): SearchResult[] {
       });
     }
 
-    // Match language
     if (region.language.toLowerCase().includes(q)) {
       results.push({
         type: "language",
@@ -42,20 +40,18 @@ export function searchAll(query: string): SearchResult[] {
       });
     }
 
-    // Match cities
     for (const city of region.cities) {
-      if (city.toLowerCase().includes(q)) {
+      if (city.name.toLowerCase().includes(q)) {
         results.push({
           type: "city",
           regionSlug: region.slug,
           regionName: region.name,
-          label: city,
+          label: city.name,
           sublabel: region.name,
         });
       }
     }
 
-    // Match phrases
     for (const phrase of region.phrases) {
       if (
         phrase.text.toLowerCase().includes(q) ||
@@ -72,7 +68,6 @@ export function searchAll(query: string): SearchResult[] {
       }
     }
 
-    // Match expressions
     for (const expr of region.expressions) {
       if (
         expr.text.toLowerCase().includes(q) ||
@@ -89,7 +84,6 @@ export function searchAll(query: string): SearchResult[] {
     }
   }
 
-  // Deduplicate by type+label
   const seen = new Set<string>();
   return results.filter((r) => {
     const key = `${r.type}-${r.label}`;

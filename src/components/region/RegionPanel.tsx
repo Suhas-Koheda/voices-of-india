@@ -3,7 +3,6 @@
 import type { Region } from "@/types/region";
 import PhraseCard from "./PhraseCard";
 import ExpressionCard from "./ExpressionCard";
-import SongCard from "./SongCard";
 import Link from "next/link";
 
 type RegionPanelProps = {
@@ -15,7 +14,10 @@ export default function RegionPanel({ region }: RegionPanelProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-stone-800">{region.name}</h2>
-        <div className="flex items-center gap-2 mt-1">
+        <p className="text-sm text-orange-500 font-medium mt-0.5">
+          {region.tagline}
+        </p>
+        <div className="flex items-center gap-2 mt-2">
           <span className="inline-block px-2.5 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
             {region.language}
           </span>
@@ -29,12 +31,35 @@ export default function RegionPanel({ region }: RegionPanelProps) {
         {region.description}
       </p>
 
+      {region.cities.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+            Cities
+          </h3>
+          <div className="space-y-2">
+            {region.cities.slice(0, 3).map((city) => (
+              <div
+                key={city.name}
+                className="bg-stone-50 rounded-lg p-3"
+              >
+                <p className="text-sm font-semibold text-stone-700">
+                  {city.name}
+                </p>
+                <p className="text-xs text-stone-400 mt-0.5">
+                  {city.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
           How locals speak
         </h3>
         <div className="space-y-3">
-          {region.phrases.map((phrase) => (
+          {region.phrases.slice(0, 3).map((phrase) => (
             <PhraseCard key={phrase.id} phrase={phrase} />
           ))}
         </div>
@@ -48,57 +73,6 @@ export default function RegionPanel({ region }: RegionPanelProps) {
           <div className="space-y-3">
             {region.expressions.map((expr) => (
               <ExpressionCard key={expr.id} expression={expr} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {region.songs.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
-            Songs &amp; folk traditions
-          </h3>
-          <div className="space-y-3">
-            {region.songs.map((song) => (
-              <SongCard key={song.id} song={song} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
-          About this region
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-xs text-stone-400 mb-0.5">Capital</p>
-            <p className="text-sm font-medium text-stone-700">
-              {region.capital}
-            </p>
-          </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-xs text-stone-400 mb-0.5">Language</p>
-            <p className="text-sm font-medium text-stone-700">
-              {region.language}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {region.cities.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
-            Major cities
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {region.cities.map((city) => (
-              <span
-                key={city}
-                className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-medium rounded-full"
-              >
-                {city}
-              </span>
             ))}
           </div>
         </div>

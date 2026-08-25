@@ -21,30 +21,34 @@ export type Song = {
   audio?: string;
 };
 
-export type CulturalNote = {
-  id: string;
-  title: string;
-  content: string;
+export type Place = {
+  name: string;
+  description: string;
 };
 
 export type Region = {
   id: string;
   name: string;
   slug: string;
+  tagline: string;
+  description: string;
   language: string;
   languageFamily: string;
-  description: string;
   capital: string;
-  cities: string[];
+  cities: Place[];
+  geography: string;
+  history: string;
+  food: Place[];
+  landmarks: Place[];
+  traditions: string;
   phrases: Phrase[];
   expressions: Expression[];
   songs: Song[];
-  culturalNotes: CulturalNote[];
   relatedSlugs?: string[];
 };
 
 export type SearchResult = {
-  type: "state" | "language" | "phrase" | "city" | "expression";
+  type: "state" | "language" | "city" | "phrase" | "expression";
   regionSlug: string;
   regionName: string;
   label: string;

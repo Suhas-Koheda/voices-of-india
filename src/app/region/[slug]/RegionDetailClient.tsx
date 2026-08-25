@@ -29,7 +29,6 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-stone-400 mb-6" aria-label="Breadcrumb">
           <Link href="/explore" className="hover:text-orange-500 transition-colors">
             Explore
@@ -40,11 +39,11 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
           <span className="text-stone-700">{region.name}</span>
         </nav>
 
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-stone-800">
             {region.name}
           </h1>
+          <p className="text-orange-500 font-medium mt-1">{region.tagline}</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-sm font-semibold rounded-full">
               {region.language}
@@ -54,9 +53,7 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Map */}
             <section>
               <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
                 Location
@@ -64,7 +61,6 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
               <RegionMap targetSlug={region.slug} className="h-64 sm:h-80" />
             </section>
 
-            {/* About */}
             <section>
               <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
                 About
@@ -72,7 +68,59 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
               <p className="text-stone-600 leading-relaxed">{region.description}</p>
             </section>
 
-            {/* Phrases */}
+            <section>
+              <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+                Geography
+              </h2>
+              <p className="text-stone-600 leading-relaxed">{region.geography}</p>
+            </section>
+
+            <section>
+              <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+                History
+              </h2>
+              <p className="text-stone-600 leading-relaxed">{region.history}</p>
+            </section>
+
+            {region.food.length > 0 && (
+              <section>
+                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+                  Food &amp; cuisine
+                </h2>
+                <div className="space-y-3">
+                  {region.food.map((item) => (
+                    <div key={item.name} className="bg-stone-50 border border-stone-100 rounded-xl p-4">
+                      <p className="text-base font-bold text-stone-800">{item.name}</p>
+                      <p className="text-sm text-stone-600 mt-0.5">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {region.landmarks.length > 0 && (
+              <section>
+                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+                  Landmarks
+                </h2>
+                <div className="space-y-3">
+                  {region.landmarks.map((lm) => (
+                    <div key={lm.name} className="bg-stone-50 border border-stone-100 rounded-xl p-4">
+                      <p className="text-base font-bold text-stone-800">{lm.name}</p>
+                      <p className="text-sm text-stone-600 mt-0.5">{lm.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section>
+              <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
+                Traditions
+              </h2>
+              <p className="text-stone-600 leading-relaxed">{region.traditions}</p>
+            </section>
+
             <section>
               <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
                 Common phrases
@@ -84,7 +132,6 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
               </div>
             </section>
 
-            {/* Expressions */}
             {region.expressions.length > 0 && (
               <section>
                 <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
@@ -98,7 +145,6 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
               </section>
             )}
 
-            {/* Songs */}
             {region.songs.length > 0 && (
               <section>
                 <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
@@ -111,33 +157,8 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
                 </div>
               </section>
             )}
-
-            {/* Cultural Notes */}
-            {region.culturalNotes.length > 0 && (
-              <section>
-                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
-                  Cultural notes
-                </h2>
-                <div className="space-y-4">
-                  {region.culturalNotes.map((note) => (
-                    <div
-                      key={note.id}
-                      className="bg-stone-50 border border-stone-100 rounded-xl p-5"
-                    >
-                      <h3 className="text-base font-bold text-stone-800 mb-1">
-                        {note.title}
-                      </h3>
-                      <p className="text-sm text-stone-600 leading-relaxed">
-                        {note.content}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
 
-          {/* Right sidebar */}
           <div className="space-y-6">
             <div className="bg-stone-50 border border-stone-100 rounded-2xl p-5">
               <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
@@ -162,16 +183,14 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
             {region.cities.length > 0 && (
               <div className="bg-stone-50 border border-stone-100 rounded-2xl p-5">
                 <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
-                  Major cities
+                  Cities
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-2">
                   {region.cities.map((city) => (
-                    <span
-                      key={city}
-                      className="px-3 py-1.5 bg-white text-stone-600 text-sm font-medium rounded-full border border-stone-200"
-                    >
-                      {city}
-                    </span>
+                    <div key={city.name} className="p-3 bg-white border border-stone-100 rounded-xl">
+                      <p className="text-sm font-semibold text-stone-800">{city.name}</p>
+                      <p className="text-xs text-stone-400 mt-0.5">{city.description}</p>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -180,7 +199,7 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
             {relatedRegions.length > 0 && (
               <div className="bg-stone-50 border border-stone-100 rounded-2xl p-5">
                 <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-3">
-                  Related regions
+                  Nearby regions
                 </h3>
                 <div className="space-y-2">
                   {relatedRegions.map((rel) => (
@@ -190,7 +209,7 @@ export default function RegionDetailClient({ region }: RegionDetailClientProps) 
                       className="block p-3 bg-white border border-stone-100 rounded-xl hover:border-orange-300 transition-colors"
                     >
                       <p className="text-sm font-semibold text-stone-800">{rel.name}</p>
-                      <p className="text-xs text-stone-400">{rel.language}</p>
+                      <p className="text-xs text-stone-400">{rel.language} · {rel.capital}</p>
                     </Link>
                   ))}
                 </div>
